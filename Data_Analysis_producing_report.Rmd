@@ -59,9 +59,11 @@ Concordance_df_T
 ```{r, echo=FALSE}
 #Percent disconcordance # add rows 4-9 and
 Percent_disconcordance <- round((sum(Concordance_df_T[4:9]) / sum(Concordance_df_T))*100, 2)
-Percent_disconcordance
 ```
 
+\newline
+The percentage of samples with disconcordant results between the production and validation plate is : **`r Percent_disconcordance`%**
+\newline
 
 
 ```{r, echo=FALSE, warning=FALSE}
