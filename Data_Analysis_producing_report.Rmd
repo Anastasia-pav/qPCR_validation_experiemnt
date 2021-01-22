@@ -12,6 +12,7 @@ A validation experiment has been performed where the same samples have been proc
 ```{r load-packages, include=FALSE}
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 ```
 
 
@@ -61,8 +62,13 @@ Percent_disconcordance
 ```
 
 
-####Plotting Cq Values####
+
 ```{r, echo=FALSE}
-plot(All_data$Channel_1_Cq_PROD, All_data$Channel_1_Cq_VAL)
-plot(All_data$Channel_2_Cq_PROD, All_data$Channel_2_Cq_VAL)
+#plot Cq values of DNA target channel, production vs validation.
+ggplot(All_data, aes(x=Channel_1_Cq_PROD, y=Channel_1_Cq_VAL)) + geom_point() +
+  xlab('Production DNA target Cq values') + ylab('Validation DNA target Cq values')
+
+#plot Cq values of Extraction control channel, production vs validation.
+ggplot(All_data, aes(x=Channel_2_Cq_PROD, y=Channel_2_Cq_VAL)) + geom_point() +
+  xlab('Production extraction control Cq values') + ylab('Validation extraction control Cq values')
 ```
