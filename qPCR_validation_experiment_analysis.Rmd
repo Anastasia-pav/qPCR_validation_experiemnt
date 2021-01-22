@@ -1,0 +1,68 @@
+---
+title: "qPCR Validation Experiment Data Analysis"
+author: "Anastasia Pavlovets"
+date: "22/01/2021"
+output: html_document
+---
+
+A laboratory using qPCR for detecting a target DNA sequence in samples is wanting tomake changes to it's standard protocol (e.g change a buffer volume to save costs).
+
+A validation experiment has been performed where the same samples have been processed following standard procedure and then also following the altered protocol.
+
+```{r load-packages, include=FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+
+```{r, echo=FALSE}
+#Read in production and validation data.
+Production_raw <- read.csv('Mock_Production_Plate.csv', header=TRUE)
+Validation_raw <- read.csv('Mock_Validation_Plate.csv', header=TRUE)
+
+
+#Select required column only
+Production_req <- Production_raw %>% select(1:3, 6:9)
+Validation_req <- Validation_raw %>% select(1:3, 6:9)
+
+#Add sufix to differentiate PROD/VAL
+colnames(Production_req) <- paste(colnames(Production_req),'PROD', sep='_')
+colnames(Validation_req) <- paste(colnames(Validation_req),'VAL', sep='_')
+
+
+#Merge data 
+All_data <- left_join(Production_req, Validation_req, by = c('Sample.ID_PROD'= 'Sample.ID_VAL'), drop=FALSE)
+
+pos_pos <- subset(All_data, Outcome_PROD == 'Positive'& Outcome_VAL == 'Positive') %>% nrow()
+neg_neg <- subset(All_data, Outcome_PROD == 'Negative' & Outcome_VAL == 'Negative') %>% nrow()
+inval_inval <- subset(All_data, Outcome_PROD == 'Invalid' & Outcome_VAL == 'Invalid') %>% nrow()
+
+pos_neg <- subset(All_data, Outcome_PROD == 'Positive' & Outcome_VAL == 'Negative') %>% nrow()
+pos_inval <- subset(All_data, Outcome_PROD == 'Positive' & Outcome_VAL == 'Invalid') %>% nrow()
+
+neg_pos <- subset(All_data, Outcome_PROD == 'Negative' & Outcome_VAL == 'Positive') %>% nrow()
+neg_inval <- subset(All_data, Outcome_PROD == 'Negative' & Outcome_VAL == 'Invalid') %>% nrow()
+
+inval_pos <- subset(All_data, Outcome_PROD == 'Invalid' & Outcome_VAL == 'Positive') %>% nrow()
+inval_neg <- subset(All_data, Outcome_PROD == 'Invalid' & Outcome_VAL == 'Negative') %>% nrow()
+
+#####concordance data frame####
+
+#Construct
+Concordance_df <- data.frame(pos_pos, neg_neg, inval_inval, pos_neg, pos_inval, neg_pos, neg_inval, inval_neg, inval_pos)
+Concordance_df_T <- t(Concordance_df) #Transpose
+
+Concordance_df_T
+```
+```{r, echo=FALSE}
+#Percent disconcordance # add rows 4-9 and
+Percent_disconcordance <- round((sum(Concordance_df_T[4:9]) / sum(Concordance_df_T))*100, 2)
+Percent_disconcordance
+```
+
+
+```{r, echo=FALSE}
+####Plotting Cq Values####
+plot(All_data$Channel_1_Cq_PROD, All_data$Channel_1_Cq_VAL)
+plot(All_data$Channel_2_Cq_PROD, All_data$Channel_2_Cq_VAL)
+```
